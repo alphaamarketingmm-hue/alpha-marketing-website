@@ -2139,5 +2139,95 @@ $$('[data-aiic]').forEach(el=>{el.innerHTML=AI_IC[el.dataset.aiic]||'';});
   }
 })();
 </script>
+<!-- ============================================================
+     CINEMATIC LAYER · additive motion-design pass (v1)
+     Self-contained (no CDN), GPU transforms only, reduced-motion safe.
+     Applies Motion-design principles: spring easing, staggered scroll
+     reveals, kinetic typography, scroll choreography. Fails safe.
+     ============================================================ -->
+<style id="cineCss">
+html.cine .reveal{transform:translateY(48px) scale(.984);filter:blur(7px);transition:opacity 1.15s var(--ease),transform 1.15s var(--ease),filter 1.15s var(--ease)}
+html.cine .reveal.in{opacity:1;transform:none;filter:blur(0)}
+html.cine .ttl-w{display:inline-block;opacity:0;transform:translateY(.6em) rotate(1.4deg);filter:blur(6px);transition:opacity .9s var(--ease),transform .9s var(--ease),filter .9s var(--ease);will-change:transform,opacity,filter}
+html.cine .ttl-w.on{opacity:1;transform:none;filter:blur(0)}
+html.cine [data-magnetic]{transition:transform .28s var(--ease),color .5s var(--ease)!important}
+html.cine [data-tilt]{transition:transform .32s var(--ease),box-shadow .6s var(--ease),border-color .6s var(--ease)}
+@keyframes cineSweep{0%{background-position:220% 0}100%{background-position:-220% 0}}
+html.cine .hero h1 .gold-text{background-image:linear-gradient(100deg,#a8852b,#f6d98a 22%,#fff7df 32%,#f6d98a 42%,#d4af37 60%,#a8852b);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:cineSweep 6s var(--ease) 1.6s infinite}
+html.cine .hero-inner{will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){html.cine .reveal{transform:none!important;filter:none!important}html.cine .ttl-w{opacity:1!important;transform:none!important;filter:none!important}html.cine .hero h1 .gold-text{animation:none!important}}
+</style>
+<script id="cineJs">
+(function(){
+  try{
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    document.documentElement.classList.add('cine');
+
+    function splitTitle(h){
+      if(h.dataset.cineDone) return [];
+      h.dataset.cineDone='1';
+      var words=[], kids=[].slice.call(h.childNodes);
+      kids.forEach(function(node){
+        if(node.nodeType===3){
+          var parts=node.textContent.split(/(\s+)/), frag=document.createDocumentFragment();
+          parts.forEach(function(p){
+            if(p===''||/^\s+$/.test(p)){ frag.appendChild(document.createTextNode(p)); return; }
+            var s=document.createElement('span'); s.className='ttl-w'; s.textContent=p;
+            frag.appendChild(s); words.push(s);
+          });
+          h.replaceChild(frag,node);
+        } else if(node.nodeType===1){
+          if(node.tagName==='BR') return;
+          node.classList.add('ttl-w'); words.push(node);
+        }
+      });
+      return words;
+    }
+
+    var tObs=('IntersectionObserver' in window)?new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          (e.target.__cineWords||[]).forEach(function(w,i){ setTimeout(function(){ w.classList.add('on'); }, i*58); });
+          tObs.unobserve(e.target);
+        }
+      });
+    },{threshold:.16,rootMargin:'0px 0px -7% 0px'}):null;
+
+    [].slice.call(document.querySelectorAll('section h2, .ctaband h2')).forEach(function(h){
+      if(!h.offsetParent || h.closest('[hidden]')) return;
+      var ws=splitTitle(h); if(!ws.length) return;
+      h.__cineWords=ws;
+      if(tObs) tObs.observe(h); else ws.forEach(function(w){ w.classList.add('on'); });
+    });
+
+    function failsafe(){
+      [].slice.call(document.querySelectorAll('.ttl-w:not(.on)')).forEach(function(w){
+        var r=w.getBoundingClientRect();
+        if(r.top<innerHeight*1.15 && r.bottom>-50) w.classList.add('on');
+      });
+    }
+    addEventListener('load',function(){ setTimeout(failsafe,500); });
+    setTimeout(failsafe,3000);
+
+    var heroInner=document.querySelector('.hero-inner'), hero=document.querySelector('.hero');
+    if(heroInner && hero && matchMedia('(pointer:fine)').matches){
+      var ticking=false;
+      var onScroll=function(){
+        if(ticking) return; ticking=true;
+        requestAnimationFrame(function(){
+          var y=window.scrollY||window.pageYOffset||0, hh=hero.offsetHeight||window.innerHeight;
+          if(y<hh){
+            var p=y/hh;
+            heroInner.style.transform='translate3d(0,'+(p*64).toFixed(1)+'px,0)';
+            heroInner.style.opacity=(Math.max(0,1-p*1.12)).toFixed(3);
+          }
+          ticking=false;
+        });
+      };
+      addEventListener('scroll',onScroll,{passive:true}); onScroll();
+    }
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
