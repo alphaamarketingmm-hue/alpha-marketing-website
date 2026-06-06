@@ -16,6 +16,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script>document.documentElement.className=document.documentElement.className.replace('no-js','js');</script>
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+} }
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ProfessionalService","name":"ALPHA MARKETING M.M","description":"AI-powered luxury marketing studio specializing in cinematic ads, AI-generated UGC, premium content, and brand growth.","sameAs":["https://www.instagram.com/alphammarketing/"],"slogan":"Where Brands Become Unforgettable.","email":"alphaamarketingmm@gmail.com","priceRange":"$$$","areaServed":"Worldwide","serviceType":["Social Media Management","Cinematic Reels & Video Ads","AI-Generated UGC","Brand Identity","Paid Advertising","Luxury Product Campaigns"]}
 </script>
@@ -49,6 +55,23 @@ img{max-width:100%;display:block}
 ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:var(--bone-2)}::-webkit-scrollbar-thumb{background:var(--ink);border-radius:0}
 :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 32px}
+
+/* ---- scroll progress bar ---- */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%;z-index:110;will-change:transform}
+/* ---- film grain (premium print texture) ---- */
+.grain{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* ---- custom cursor (fine pointers only, set via JS) ---- */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:130;mix-blend-mode:difference;opacity:0;transition:opacity .4s ease}
+.cursor-dot{width:7px;height:7px;background:#fff;transform:translate(-50%,-50%)}
+.cursor-ring{width:42px;height:42px;border:1px solid #fff;transform:translate(-50%,-50%);transition:width .3s var(--ease),height .3s var(--ease),opacity .4s ease,background .3s ease}
+body.cursor-on.curfine{cursor:none}
+body.curfine input,body.curfine textarea{cursor:text}
+body.curfine .cursor-dot.show,body.curfine .cursor-ring.show{opacity:1}
+.cursor-ring.grow{width:66px;height:66px;background:rgba(255,255,255,.12)}
+/* ---- 3D hero canvas ---- */
+#gpu{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.6s var(--ease)}
+#gpu.on{opacity:1}
 section{position:relative}
 .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:14px}
 .eyebrow::before{content:"";width:34px;height:1px;background:var(--accent)}
@@ -305,6 +328,10 @@ footer{background:var(--ink);color:var(--bone);padding:70px 0 40px;border-top:1p
 </style>
 </head>
 <body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor-ring" id="curRing" aria-hidden="true"></div>
+<div class="cursor-dot" id="curDot" aria-hidden="true"></div>
 
 <!-- NAV -->
 <header id="header">
@@ -338,6 +365,7 @@ footer{background:var(--ink);color:var(--bone);padding:70px 0 40px;border-top:1p
 <section class="hero" id="home">
   <div class="hero-blob hb1"></div>
   <div class="hero-blob hb2"></div>
+  <canvas id="gpu" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="hero-top">
       <span class="hero-status"><span class="dot"></span> Accepting select brands · 2026</span>
@@ -697,6 +725,36 @@ footer{background:var(--ink);color:var(--bone);padding:70px 0 40px;border-top:1p
     });
   }
 
+  /* ---- Scroll progress bar ---- */
+  var prog=$('#progress');
+  var setProg=function(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    prog.style.transform='scaleX('+(h>0?Math.min(window.scrollY/h,1):0)+')';
+  };
+  setProg(); window.addEventListener('scroll',setProg,{passive:true}); window.addEventListener('resize',setProg);
+
+  /* ---- Custom cursor (fine pointers) ---- */
+  if(matchMedia('(pointer:fine)').matches){
+    document.body.classList.add('curfine','cursor-on');
+    var dot=$('#curDot'), ring=$('#curRing');
+    var mx=window.innerWidth/2,my=window.innerHeight/2,rx=mx,ry=my,shown=false;
+    window.addEventListener('mousemove',function(e){
+      mx=e.clientX;my=e.clientY;
+      dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%)';
+      if(!shown){shown=true;dot.classList.add('show');ring.classList.add('show');}
+    });
+    document.addEventListener('mouseleave',function(){dot.classList.remove('show');ring.classList.remove('show');shown=false;});
+    var hoverSel='a,button,[data-magnetic],.svc,.tile,.pkg,.faq button,.stat,input,textarea';
+    document.addEventListener('mouseover',function(e){if(e.target.closest(hoverSel))ring.classList.add('grow');});
+    document.addEventListener('mouseout',function(e){if(e.target.closest(hoverSel))ring.classList.remove('grow');});
+    var ringLoop=function(){
+      rx+=(mx-rx)*(reduce?1:0.18); ry+=(my-ry)*(reduce?1:0.18);
+      ring.style.transform='translate('+rx+'px,'+ry+'px) translate(-50%,-50%)';
+      requestAnimationFrame(ringLoop);
+    };
+    requestAnimationFrame(ringLoop);
+  }
+
   /* ---- Contact form (front-end acknowledgement) ---- */
   var form=$('#contactForm'), note=$('#formNote');
   if(form){
@@ -709,6 +767,124 @@ footer{background:var(--ink);color:var(--bone);padding:70px 0 40px;border-top:1p
       window.location.href='mailto:alphaamarketingmm@gmail.com?subject='+subject+'&body='+body;
     });
   }
+})();
+</script>
+
+<!-- ============================================================
+     3D HERO — obsidian gem with studio reflections (three.js ESM)
+     Graceful: skips silently if WebGL/CDN unavailable; static frame
+     for reduced motion. CSS hero stays intact underneath.
+     ============================================================ -->
+<script type="module">
+(async function(){
+  var canvas=document.getElementById('gpu');
+  if(!canvas)return;
+  try{var t=document.createElement('canvas');if(!(t.getContext('webgl2')||t.getContext('webgl')))return;}catch(e){return;}
+  var THREE, RoomEnvironment;
+  try{
+    THREE=await import('three');
+    ({RoomEnvironment}=await import('three/addons/environments/RoomEnvironment.js'));
+  }catch(e){return;}
+
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var hero=document.getElementById('home');
+  var W=canvas.clientWidth||window.innerWidth, H=canvas.clientHeight||window.innerHeight;
+
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(40, W/H, 0.1, 100);
+  camera.position.set(0,0,7);
+
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true});
+  renderer.setClearColor(0x000000,0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(W,H,false);
+
+  /* studio environment → crisp reflections on the gem */
+  var pmrem=new THREE.PMREMGenerator(renderer);
+  scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+
+  var group=new THREE.Group(); scene.add(group);
+
+  /* faceted obsidian gem */
+  var gem=new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1.5,0),
+    new THREE.MeshPhysicalMaterial({color:0x14110d,metalness:1,roughness:0.16,
+      clearcoat:1,clearcoatRoughness:0.18,flatShading:true,envMapIntensity:1.2})
+  );
+  group.add(gem);
+
+  /* graphic vermilion wireframe shell */
+  var shell=new THREE.LineSegments(
+    new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.2,0)),
+    new THREE.LineBasicMaterial({color:0xC0411F,transparent:true,opacity:0.5})
+  );
+  group.add(shell);
+
+  /* lighting: warm key + vermilion rim + soft fill */
+  var key=new THREE.DirectionalLight(0xffffff,2.4); key.position.set(4,6,5); scene.add(key);
+  var rim=new THREE.DirectionalLight(0xC0411F,3.2); rim.position.set(-5,-2,-3); scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xffffff,0.32));
+
+  var baseY=0.2;
+  function layout(){
+    W=canvas.clientWidth||window.innerWidth; H=canvas.clientHeight||window.innerHeight;
+    camera.aspect=W/H; camera.updateProjectionMatrix();
+    renderer.setSize(W,H,false);
+    var wide=W>820;
+    group.position.x = wide ? 2.4 : 0;
+    baseY = wide ? 0.2 : 0.5;
+    camera.position.z = wide ? 7 : 9;
+  }
+  layout(); window.addEventListener('resize',layout);
+
+  var tx=0,ty=0,cx=0,cy=0;
+  hero.addEventListener('mousemove',function(e){
+    var r=hero.getBoundingClientRect();
+    tx=((e.clientX-r.left)/r.width-0.5)*2; ty=((e.clientY-r.top)/r.height-0.5)*2;
+  });
+  hero.addEventListener('mouseleave',function(){tx=0;ty=0;});
+  var sY=0; window.addEventListener('scroll',function(){sY=window.scrollY;},{passive:true});
+
+  canvas.classList.add('on');
+
+  var running=true;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){running=es[0].isIntersecting;}).observe(hero);
+  }
+
+  var clock=new THREE.Clock();
+  function frame(){
+    requestAnimationFrame(frame);
+    if(!running)return;
+    var t=clock.getElapsedTime();
+    cx+=(tx-cx)*0.05; cy+=(ty-cy)*0.05;
+    group.rotation.y = t*0.18 + cx*0.55;
+    group.rotation.x = Math.sin(t*0.3)*0.14 - cy*0.4;
+    group.rotation.z = sY*0.0004;
+    group.position.y = baseY + Math.sin(t*0.8)*0.12;
+    shell.rotation.y = -t*0.12; shell.rotation.x = t*0.06;
+    renderer.render(scene,camera);
+  }
+  if(reduce){ group.rotation.set(0.32,0.6,0); renderer.render(scene,camera); }
+  else frame();
+})();
+</script>
+
+<!-- Motion-library scroll parallax (progressive enhancement) -->
+<script type="module">
+(async function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var M;
+  try{ M=await import('https://cdn.jsdelivr.net/npm/motion@12/+esm'); }catch(e){return;}
+  var scroll=M.scroll, animate=M.animate;
+  try{
+    scroll(animate('.hb1',{y:[-30,90]},{ease:'linear'}));
+    scroll(animate('.hb2',{y:[50,-70]},{ease:'linear'}));
+    document.querySelectorAll('.tile .wm').forEach(function(w){
+      scroll(animate(w,{y:[18,-26]},{ease:'linear'}),
+        {target:w.closest('.tile'),offset:['start end','end start']});
+    });
+  }catch(e){}
 })();
 </script>
 </body>
