@@ -46,6 +46,11 @@ body{background:var(--black);color:var(--white);font-family:var(--sans);font-wei
 body.lock{overflow:hidden}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
+/* keyboard accessibility — visible gold focus ring (mouse users unaffected) */
+:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;border-radius:3px}
+.btn:focus-visible{outline-offset:4px}
+/* offset anchor targets so section headings clear the fixed header */
+section[id],[id].hero{scroll-margin-top:96px}
 ::selection{background:var(--gold);color:#000}
 ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:#070707}::-webkit-scrollbar-thumb{background:linear-gradient(var(--gold-deep),var(--gold));border-radius:9px}
 
@@ -74,7 +79,8 @@ h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.04;letter-spa
 .btn{position:relative;display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;padding:17px 32px;cursor:pointer;background:transparent;color:var(--white);overflow:hidden;border:1px solid var(--gold);border-radius:3px;transition:color .5s var(--ease),transform .3s var(--ease)}
 .btn span{position:relative;z-index:2}
 .btn::before{content:"";position:absolute;inset:0;z-index:1;background:var(--gold-grad);transform:translateX(-101%) skewX(-12deg);transition:transform .55s var(--ease)}
-.btn:hover{color:#000}.btn:hover::before{transform:translateX(0) skewX(-12deg)}
+.btn:hover{color:#000;transform:translateY(-2px)}.btn:hover::before{transform:translateX(0) skewX(-12deg)}
+.btn:active{transform:translateY(0) scale(.985);transition-duration:.08s}
 .btn-gold{background:var(--gold-grad);color:#000;border-color:transparent}.btn-gold::before{background:#fff}
 .btn-ghost{border-color:var(--line-2)}.btn-ghost::before{background:var(--gold-grad)}
 
@@ -168,7 +174,12 @@ body.has3d #net{opacity:.35;mix-blend-mode:screen}
 /* reveal */
 .reveal{opacity:0;transform:translateY(40px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
 .reveal.in{opacity:1;transform:none}
-.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+/* directional reveal variants — richer scroll entrances (share the .reveal observer) */
+.reveal.from-l{transform:translateX(-48px)}
+.reveal.from-r{transform:translateX(48px)}
+.reveal.from-scale{transform:scale(.94)}
+.reveal.from-l.in,.reveal.from-r.in,.reveal.from-scale.in{transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}.d5{transition-delay:.4s}.d6{transition-delay:.48s}
 
 /* ============ (legacy bento removed — About is now the AI Control Room) ============ */
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -845,10 +856,10 @@ body.cmodal-lock{overflow:hidden}
       <h2>Work That <span class="gold-text">Performs.</span></h2>
     </div>
     <div class="impact-grid">
-      <div class="imp reveal d1"><div class="big" data-count="3" data-suffix="x">0x</div><div class="lbl">Avg. Engagement Lift</div><div class="sub">vs. previous content</div></div>
-      <div class="imp reveal d2"><div class="big" data-count="12" data-suffix="M+">0</div><div class="lbl">Views Generated</div><div class="sub">across client reels</div></div>
-      <div class="imp reveal d3"><div class="big" data-count="60" data-suffix="+">0</div><div class="lbl">Brands Elevated</div><div class="sub">and counting</div></div>
-      <div class="imp reveal d4"><div class="big" data-count="72" data-suffix="h">0</div><div class="lbl">Avg. First Concepts</div><div class="sub">from kickoff to drafts</div></div>
+      <div class="imp reveal from-scale d1"><div class="big" data-count="3" data-suffix="x">0x</div><div class="lbl">Avg. Engagement Lift</div><div class="sub">vs. previous content</div></div>
+      <div class="imp reveal from-scale d2"><div class="big" data-count="12" data-suffix="M+">0</div><div class="lbl">Views Generated</div><div class="sub">across client reels</div></div>
+      <div class="imp reveal from-scale d3"><div class="big" data-count="60" data-suffix="+">0</div><div class="lbl">Brands Elevated</div><div class="sub">and counting</div></div>
+      <div class="imp reveal from-scale d4"><div class="big" data-count="72" data-suffix="h">0</div><div class="lbl">Avg. First Concepts</div><div class="sub">from kickoff to drafts</div></div>
     </div>
   </div>
 </section>
@@ -866,7 +877,7 @@ body.cmodal-lock{overflow:hidden}
 
     <div class="ctrl-grid">
       <!-- LEFT: manifesto -->
-      <div class="ctrl-left reveal">
+      <div class="ctrl-left reveal from-l">
         <div class="badge-row">
           <b>AI Creative Direction</b><b>Data-Informed Strategy</b><b>Cinematic Execution</b>
         </div>
@@ -886,7 +897,7 @@ body.cmodal-lock{overflow:hidden}
       </div>
 
       <!-- RIGHT: ALPHA Brand Engine -->
-      <div class="engine reveal d1" id="brandEngine">
+      <div class="engine reveal from-r d1" id="brandEngine">
         <span class="sweep"></span>
         <div class="engine-bar">
           <span class="ttl">ALPHA Brand Engine</span>
