@@ -2146,12 +2146,10 @@ $$('[data-aiic]').forEach(el=>{el.innerHTML=AI_IC[el.dataset.aiic]||'';});
      reveals, kinetic typography, scroll choreography. Fails safe.
      ============================================================ -->
 <style id="cineCss">
-html.cine .reveal{transform:translateY(48px) scale(.984);filter:blur(7px);transition:opacity 1.15s var(--ease),transform 1.15s var(--ease),filter 1.15s var(--ease)}
+html.cine .reveal{transform:translateY(46px) scale(.986);filter:blur(5px);transition:opacity 1.15s var(--ease),transform 1.15s var(--ease),filter 1.15s var(--ease)}
 html.cine .reveal.in{opacity:1;transform:none;filter:blur(0)}
 html.cine .ttl-w{display:inline-block;opacity:0;transform:translateY(.6em) rotate(1.4deg);filter:blur(6px);transition:opacity .9s var(--ease),transform .9s var(--ease),filter .9s var(--ease);will-change:transform,opacity,filter}
 html.cine .ttl-w.on{opacity:1;transform:none;filter:blur(0)}
-html.cine [data-magnetic]{transition:transform .28s var(--ease),color .5s var(--ease)!important}
-html.cine [data-tilt]{transition:transform .32s var(--ease),box-shadow .6s var(--ease),border-color .6s var(--ease)}
 @keyframes cineSweep{0%{background-position:220% 0}100%{background-position:-220% 0}}
 html.cine .hero h1 .gold-text{background-image:linear-gradient(100deg,#a8852b,#f6d98a 22%,#fff7df 32%,#f6d98a 42%,#d4af37 60%,#a8852b);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:cineSweep 6s var(--ease) 1.6s infinite}
 html.cine .hero-inner{will-change:transform,opacity}
