@@ -2135,7 +2135,15 @@ $$('[data-aiic]').forEach(el=>{el.innerHTML=AI_IC[el.dataset.aiic]||'';});
 
       renderer.render(scene,camera);
     }
-    animate();
+
+    // respect prefers-reduced-motion: render one static frame instead of animating
+    var reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduceMotion){
+      group.rotation.y=0.4;
+      renderer.render(scene,camera);
+    }else{
+      animate();
+    }
   }
 })();
 </script>
