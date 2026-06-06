@@ -2150,10 +2150,14 @@ html.cine .reveal{transform:translateY(46px) scale(.986);filter:blur(5px);transi
 html.cine .reveal.in{opacity:1;transform:none;filter:blur(0)}
 html.cine .ttl-w{display:inline-block;opacity:0;transform:translateY(.6em) rotate(1.4deg);filter:blur(6px);transition:opacity .9s var(--ease),transform .9s var(--ease),filter .9s var(--ease);will-change:transform,opacity,filter}
 html.cine .ttl-w.on{opacity:1;transform:none;filter:blur(0)}
-@keyframes cineSweep{0%{background-position:220% 0}100%{background-position:-220% 0}}
-html.cine .hero h1 .gold-text{background-image:linear-gradient(100deg,#a8852b,#f6d98a 22%,#fff7df 32%,#f6d98a 42%,#d4af37 60%,#a8852b);background-size:230% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:cineSweep 6s var(--ease) 1.6s infinite}
+@keyframes cineFlow{0%{background-position:200% 50%}100%{background-position:-60% 50%}}
+@keyframes cineGlow{0%,100%{filter:drop-shadow(0 0 2px rgba(246,217,138,.18))}50%{filter:drop-shadow(0 0 18px rgba(246,217,138,.6))}}
+@keyframes cineBtnGlow{0%,100%{box-shadow:0 14px 34px -18px rgba(212,175,55,.5)}50%{box-shadow:0 20px 58px -14px rgba(246,217,138,.85)}}
+html.cine h1 .gold-text,html.cine h2 .gold-text{background-image:linear-gradient(100deg,#a8852b,#d4af37 26%,#fff7df 50%,#f6d98a 62%,#a8852b 88%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:cineFlow 6.5s linear infinite}
+html.cine .hero h1 .gold-text{animation:cineFlow 5s linear infinite,cineGlow 4.5s var(--ease) infinite}
+html.cine .btn-gold{animation:cineBtnGlow 3.8s var(--ease) infinite}
 html.cine .hero-inner{will-change:transform,opacity}
-@media(prefers-reduced-motion:reduce){html.cine .reveal{transform:none!important;filter:none!important}html.cine .ttl-w{opacity:1!important;transform:none!important;filter:none!important}html.cine .hero h1 .gold-text{animation:none!important}}
+@media(prefers-reduced-motion:reduce){html.cine .reveal{transform:none!important;filter:none!important}html.cine .ttl-w{opacity:1!important;transform:none!important;filter:none!important}html.cine h1 .gold-text,html.cine h2 .gold-text,html.cine .btn-gold{animation:none!important;filter:none!important}}
 </style>
 <script id="cineJs">
 (function(){
